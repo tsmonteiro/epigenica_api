@@ -3,6 +3,7 @@ FROM google/cloud-sdk
 RUN apt-get update && apt-get install -y python3-pip python3
 
 RUN mkdir /app
+RUN mkdir /app/funcs
 WORKDIR /app
 
 
@@ -19,9 +20,15 @@ RUN apt-get install -y r-base r-base-dev
 
 RUN R -e "install.packages('googledrive')"
 RUN R -e "install.packages('dplyr')"
+RUN R -e "install.packages('matrixStats')"
+
 
 ADD ./app.py /app
 ADD ./ChAMP_Process_GDrive.R /app
+ADD ./funcs/champ_filter_epi.R /app/funcs/champ_filter_epi.R
+ADD ./funcs/champ_import_epi.R /app/funcs/champ_import_epi.R
+ADD ./funcs/impute_epi.R /app/funcs/impute_epi.R
+ADD ./funcs/readIDAT_epi.R /app/funcs/readIDAT_epi.R
 ADD ./*.Rda /app/
 
 
@@ -29,6 +36,6 @@ ADD ./*.Rda /app/
 EXPOSE 8080
 
 # ENV FLASK_ENV development
-#CMD exec gunicorn --timeout 3600 --bind :$PORT --workers 1 --threads 1 app:app
-CMD exec gunicorn --timeout 3600 --bind :$PORT --workers 1 --threads 1 app:app
+CMD exec gunicorn --timeout 3600 --bind  0.0.0.0:8080 --workers 1 --threads 1 app:app
+#CMD exec gunicorn --timeout 3600 --bind :8080 --workers 1 --threads 1 app:app
 #ENTRYPOINT ["python", "services.py"]
